@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+{% block title %}CheckOut - UprintMate{% endblock %}
+{% block menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block moblie_menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<!--body-->
+{% if user.is_authenticated %}
+<div class="container mx-auto mt-10">
+    <form method="post" id="form" action="https://www.sandbox.paypal.com/cgi-bin/webscr">
+        {% csrf_token %}
+        <div class="block lg:flex shadow-md my-10">
+            <!--左侧-->
+            <div class="w-full lg:w-3/4 bg-white px-10 py-10">
+                <h1 class="text-3xl font-bold">Checkout</h1>
+                <div class="divider"></div>
+                <div class="mt-10">
+                    <div class="flex flex-wrap mb-4 -mx-2">
+                        <div class="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="full-name">
+                                Full Name *
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="full-name" type="text" placeholder="Jane Doe" name="full_name" required>
+                        </div>
+                        <div class="w-full md:w-1/2 px-2">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="address">
+                                Address *
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="address" type="text" placeholder="123 Main St" name="address" required>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap mb-4 -mx-2">
+                        <div class="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="address2">
+                                Address 2
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="address2" name="address2" type="text" placeholder="Apartment, suite, etc.">
+                        </div>
+                        <div class="w-full md:w-1/2 px-2">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="city">
+                                City *
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="city" name="city" type="text" placeholder="Anytown" required>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap mb-4 -mx-2">
+                        <div class="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="state">
+                                State *
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="state" name="state" type="text" placeholder="California" required>
+                        </div>
+                        <div class="w-full md:w-1/2 px-2">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="zip">
+                                Zip Code *
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="zip" name="zip_code" type="text" placeholder="90210" required>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap mb-4 -mx-2">
+                        <div class="w-full md:w-1/2 px-2 mb-4 md:mb-0">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="email">
+                                Email *
+                            </label>
+                            <input class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                   id="email" name="email" type="email" placeholder="name@example.com" required>
+                        </div>
+                        <div class="w-full md:w-1/2 px-2">
+                            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                   for="country">
+                                Country *
+                            </label>
+                            <div class="relative">
+                                <select class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                        id="country" name="country">
+                                    <option>United States</option>
+                                    <option>Canada</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg class="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"
+                                         width="16"
+                                         height="16">
+                                        <path d="M573.056 752l308.8-404.608A76.8 76.8 0 0 0 820.736 224H203.232a76.8 76.8 0 0 0-61.056 123.392l308.8 404.608a76.8 76.8 0 0 0 122.08 0z"
+                                              fill="#000000"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--右侧-->
+            <div id="summary" class="w-full lg:w-1/4 px-8 py-10">
+                <h1 class="font-semibold text-2xl border-b pb-8">Order Summary</h1>
+                <div class="py-4">
+                    <label class="inline-block mb-3 uppercase font-bold">Shipping</label>
+                    <select class="select select-accent w-full max-w-xs" id="shipcost" required>
+                        <option value="" selected></option>
+                        {% for ship in shippingfee %}
+                        <option value="{{ ship.cost }}">
+                            {{ ship.express }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="inline-block mb-3 uppercase font-bold">Payment Method</label>
+                    <select class="select select-accent w-full max-w-xs">
+                        <option selected>Palpay</option>
+                    </select>
+                </div>
+                <!--备注-->
+                <div class="form-control mt-4">
+                    <label class="label">
+                        <span class="label-text font-semibold">Add notes</span>
+                    </label>
+                    <textarea name="notes" id="notes" class="textarea textarea-bordered h-24" placeholder="Add notes"></textarea>
+                </div>
+                <div class="border-t mt-8">
+                    <div class="flex font-semibold justify-between py-2 uppercase">
+                        <span>Total cost</span>
+                        <span id="total_cost">0</span>
+                    </div>
+                    <div class="flex justify-between uppercase py-2">
+                        <span class="text-sm">Items <span id="cart_items">0</span></span>
+                        <span id="total">0</span>
+                    </div>
+                    <div class="flex justify-between uppercase pb-6">
+                        <span class="text-sm">Shipping cost</span>
+                        <span id="shipping">0</span>
+                    </div>
+                    <div>
+                        <input type="hidden" name="amount" value="1" id="amount">
+                        {{ form }}
+                        <input type="submit" value="Payment" id="checkout"
+                               class="cursor-pointer bg-indigo-500 font-semibold hover:bg-indigo-600 py-3 text-sm text-white uppercase w-full">
+                    </div>
+                </div>
+                <a href="/" class="lg:hidden flex font-semibold text-indigo-600 text-sm mt-10">
+                    <svg class="fill-current mr-2 text-indigo-600 w-4" viewBox="0 0 448 512">
+                        <path d="M134.059 296H436c6.627 0 12-5.373 12-12v-56c0-6.627-5.373-12-12-12H134.059v-46.059c0-21.382-25.851-32.09-40.971-16.971L7.029 239.029c-9.373 9.373-9.373 24.569 0 33.941l86.059 86.059c15.119 15.119 40.971 4.411 40.971-16.971V296z"/>
+                    </svg>
+                    Continue Shopping
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+{% else %}
+<section class="h-screen mx-auto container my-10 flex items-center justify-center">
+    <div class="card w-96 bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">New message!</h2>
+            <p>You have not placed any orders yet.</p>
+            <div class="card-actions justify-end">
+                <a href="/" class="btn btn-primary">Buy Now</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block script %}
+{% load static %}
+<script src="{% static 'goods/js/jquery.js' %}"></script>
+<script>
+    const countrySelect = document.getElementById('country');
+    const form = document.querySelector('#form');
+    const totalCost = document.getElementById('total_cost').textContent;
+    document.getElementById('amount').value = totalCost.replace('$', '');
+
+    form.addEventListener('submit', (event) => {
+        const userLanguage = navigator.language.toLowerCase();
+        const selectedCountry = countrySelect.value;
+        // 检查用户选择的国家是否需要显示弹窗
+        if (selectedCountry !== 'United States' && selectedCountry !== 'Canada' && userLanguage !== 'en-us' && userLanguage !== 'en-ca') {
+            event.preventDefault();
+            createPopup('<div class="p-4">Your country or region does not support this order')
+        }
+    });
+
+    function createPopup(message) {
+        const popup = document.createElement('div');
+        popup.classList.add('popup');
+        popup.innerHTML = `
+    <div class="popup-content">
+      <p class="m-4 text-sm">${message}</p>
+      <div class="close-button cursor-pointer p-2">
+        <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M512 1024C229.248 1024 0 794.752 0 512S229.248 0 512 0s512 229.248 512 512-229.248 512-512 512z m0-572.330667L300.629333 240.213333a42.538667 42.538667 0 0 0-60.16 0.213334 42.410667 42.410667 0 0 0-0.213333 60.16L451.669333 512 240.213333 723.370667a42.538667 42.538667 0 0 0 0.213334 60.16 42.410667 42.410667 0 0 0 60.16 0.213333L512 572.330667l211.370667 211.413333a42.538667 42.538667 0 0 0 60.16-0.213333 42.410667 42.410667 0 0 0 0.213333-60.16L572.330667 512l211.413333-211.370667a42.538667 42.538667 0 0 0-0.213333-60.16 42.410667 42.410667 0 0 0-60.16-0.213333L512 451.669333z" fill="#d4237a"></path></svg>
+      </div>
+    </div>
+  `;
+        document.body.appendChild(popup);
+
+        const closeButton = popup.querySelector('.close-button');
+        closeButton.addEventListener('click', () => {
+            document.body.removeChild(popup);
+        });
+    }
+</script>
+<script>
+    function submitHandler() {
+        let formData = new FormData(document.getElementById('form'));
+        // 异步提交
+        fetch('/checkout/', {
+            method: 'POST',
+            body: formData
+        })
+    }
+    document.getElementById('checkout').addEventListener('click', submitHandler);
+
+    // 获取运费
+    $(document).ready(function () {
+        $("#shipcost").change(function () {
+            let selectedCost = parseFloat($(this).val());
+            // 获取总价
+            const total = localStorage.getItem('cartTotal');
+            let ship_ping = $("#shipping")
+            let cart_items = parseFloat($("#cart_items").text());
+            if (!isNaN(selectedCost) && !isNaN(cart_items)) {
+                let shipPrice = selectedCost * cart_items;
+                ship_ping.text(shipPrice);
+                let totals = parseFloat(total) + shipPrice;
+                document.getElementById('amount').value = totals;
+                document.getElementById('total').textContent = `$${totals}`;
+                document.getElementById('total_cost').textContent = `$${totals}`;
+            }
+        });
+    });
+    // 获取总价
+    const total = localStorage.getItem('cartTotal');
+    // 赋值给amount
+    const amount = parseFloat(total).toFixed(2);
+    document.getElementById('amount').value = amount;
+    document.getElementById('total').textContent = `$${total}`;
+    document.getElementById('total_cost').textContent = `$${total}`;
+</script>
+<style>
+    .btns {
+        border: 10px;
+        border-radius: 0.5rem;
+        padding: 8px;
+    }
+    .popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .popup-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        max-width: 400px;
+        max-height: 400px;
+        overflow-y: auto;
+        text-align: center;
+        position: relative;
+    }
+
+    .close-button {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+</style>
+{% endblock %}

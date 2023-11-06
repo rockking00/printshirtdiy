@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{{articles.title}} - UprintMate{% endblock %}
+{% block menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block moblie_menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<!--面包屑-->
+<div class="pl-8 lg:pl-24 text-sm breadcrumbs my-4 lg:my-10">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/c/{{category.slug}}/">{{category.name}}</a></li>
+        <li><a href="{{ request.get_full_path }}">{{articles.title}}</a></li>
+    </ul>
+</div>
+<article class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mb-28">
+    <div class="max-w-5xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mt-12 mb-8">{{ articles.title }}</h1>
+        <div class="flex flex-warp -mx-4">
+            <div class="w-full md:w-1/2 px-4 mb-8">
+                <img src="{{ articles.image.url }}" alt="{{ articles.image.name }}"
+                     class="w-full h-auto object-cover rounded-lg">
+            </div>
+            <div class="w-full md:w-1/2 px-4">
+                <p class="text-gray-700 text-base mb-4">{{ articles.content|safe }}</p>
+                <p class="text-gray-500 text-sm mb-4 my-10">Posted on {{ articles.created_at|date:"F d, Y" }} by {{ articles.author }}</p>
+                <div class="flex items-center space-x-4">
+                    <div class="block flex-shrink-0">
+                        <img src="/static/admin.png" alt="Author" class="w-12 h-12 rounded-full">
+                    </div>
+                    <div>
+                        <p class="text-base font-medium text-gray-900">{{ articles.author }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</article>
+{% endblock %}
+
+{% block script %}
+{% load static %}
+{% endblock %}

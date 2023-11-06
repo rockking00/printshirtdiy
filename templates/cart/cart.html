@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Shopping Cart - UprintMate{% endblock %}
+{% block menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block moblie_menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<!--body-->
+<div class="container mx-auto my-8 px-4 md:px-0 md:w-2/3 lg:max-w-7xl">
+    <div class="flex justify-between items-center">
+        <h1 class="text-sm lg:text-2xl font-bold mb-4">Shopping Cart</h1>
+        <div class="flex items-center">
+            <p class="text-sm lg:text-2xl font-bold mb-4">Total: <span>$</span></p>
+            <span class="text-sm lg:text-2xl mb-4 font-bold" id="total">0</span>
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="w-full">
+            <thead>
+            <tr class="bg-gray-700">
+                <th class="px-4 py-2 text-left text-white font-bold">PRODUCT</th>
+                <th class="px-4 py-2 text-left text-white font-bold">DESCRIPTION</th>
+                <th class="px-4 py-2 text-left text-white font-bold">PRICE</th>
+                <th class="px-4 py-2 text-left text-white font-bold">QUANTITY</th>
+                <th class="px-4 py-2 text-left text-white font-bold">SUBTOTAL</th>
+                <th class="px-4 py-2 text-left text-white font-bold">OPERATE</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for items in goods %}
+            <tr class="border-b border-gray-200">
+                <td class="px-4 py-3 text-gray-600 font-medium">
+                    <div class="w-20">
+                        <a href="/media/{{items.imagename}}" target="_blank">
+                            <img class="border-0 rounded-md h-auto product-img" src="/media/{{items.imagename}}" alt="{{items.imagename}}">
+                        </a>
+                        <a href="/remove?id={{items.cid}}" class="block lg:hidden text-center text-xs text-red-600 hover:text-red-800">Remove</a>
+                        <a href="/edit/{{items.cid}}{{items.product_id}}/" class="block lg:hidden text-center text-xs text-blue-600 hover:text-blue-800">Edit</a>
+                    </div>
+                </td>
+                <td class="border-b border-gray-200">
+                    <div class="flex flex-col justify-between ml-4 flex-grow gap-0 lg:gap-4 my-2">
+                        <span class="text-xs">Style: {{items.style}}</span>
+                        <span class="text-xs">Size: {{items.size}}</span>
+                        <span class="text-xs">Color: {{items.color}}</span>
+                        <span class="text-xs">Image Size: {{items.img_size}}</span>
+                        <span class="text-xs">左上角坐标: {{items.left_coordinate}}</span>
+                        <span class="text-xs">缩放比例: {{items.scaling}}</span>
+                        <span class="text-xs">图片中心点坐标: {{items.coicp}}</span>
+                    </div>
+                </td>
+                <td class="px-4 py-3 text-gray-600 font-medium price">${{items.price}}</td>
+                <td class="px-4 py-3 text-gray-600 font-medium">
+                    <div class="flex">
+                        <input type="number" class="num w-12 text-center" value="{{items.num}}" disabled>
+                    </div>
+                </td>
+                <td class="px-4 py-3 text-gray-600 font-medium subtotal">${{items.subtotal}}</td>
+                <td class="px-4 py-3 text-gray-600 font-medium">
+                    <a href="/remove?id={{items.cid}}" class="text-red-600 text-sm hover:text-red-800 block">Remove</a>
+                    <a href="/edit/{{items.cid}}{{items.product_id}}/" class="text-sm text-blue-600 hover:text-blue-800">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if not goods %}
+    <div class="text-center my-4">
+        You do not have any products in your shopping cart. Click <a href="/" class="text-blue-500">here</a> to start shopping.
+    </div>
+    {% endif %}
+    <div class="mt-4 flex justify-between items-center">
+        {% if goods %}
+        <a href="/" class="text-xs btn">Continue Shopping</a>
+        <a href="/checkout/" class="btn">CHECKOUT</a>
+        {% else %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+{% load static %}
+<script>
+    // 初始总价
+    let subtotals = document.querySelectorAll('.subtotal');
+    let total = 0;
+    subtotals.forEach(subtotal => {
+        total += parseFloat(subtotal.textContent.replace('$', ''));
+    });
+    // 将总价保存到本地存储
+    localStorage.setItem('cartTotal', total);
+
+    // 页面加载后读取并恢复总价
+    const total_ = localStorage.getItem('cartTotal');
+    document.getElementById('total').textContent = `${total_}`;
+</script>
+{% endblock %}

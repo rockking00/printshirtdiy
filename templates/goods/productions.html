@@ -1,0 +1,596 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}New Upload - UprintMate{% endblock %}
+{% block menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block moblie_menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block style %}
+<script src="{% static 'goods/js/fabric.min.js' %}"></script>
+<script src="{% static 'goods/js/dom-to-image.min.js' %}"></script>
+<link href="{% static 'goods/css/font-awesome.min.css' %}" rel="stylesheet">
+<style>
+    html, body {
+        overflow-x: hidden;
+    }
+
+    .t-design {
+        position: relative;
+        width: 600px;
+        height: 600px;
+    }
+
+    @media (max-width: 767px) {
+        /* 在视口宽度小于 767 像素时，将元素的宽度设置为 100% */
+        .t-design {
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    .t-design img {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        height: 100%;
+        width: 100%;
+    }
+
+    .design-container {
+        position: absolute;
+        left: 140px;
+        top: 120px;
+    }
+
+    #custom_img {
+        position: absolute;
+        right: 50px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!--body-->
+{% if user.is_authenticated %}
+<main class="mx-6">
+    <!--加载效果-->
+    <div class="hidden z-50 relative top-44" id="loading">
+        <div class="absolute inset-0 flex justify-center items-center">
+            <img src="/static/demo/img.svg" width="200" alt="">
+        </div>
+    </div>
+    {% if pid %}
+    <div class="flex flex-wrap lg:flex-row gap-4 justify-center mt-10 border-2 shadow-lg rounded-xl p-4">
+        <input id="file" type="file" class="file-input file-input-warning file-input-bordered mb-4" name="image" accept="image/*" required/>
+        <button class="btn btn-outline btn-md" id="upload_file">Upload File</button>
+        <button class="btn btn-outline btn-md" id="preview">Preview</button>
+    </div>
+    {% endif %}
+    <div class="flex justify-center gap-4 mt-8">
+        <button class="btn btn-sm btn-outline" onclick="showFront()">Front side</button>
+        <button class="btn btn-sm btn-outline" onclick="showBack()">Back side</button>
+    </div>
+    <section class="container mx-auto my-8 flex flex-col lg:flex-row justify-center items-center gap-8">
+        <!--左边-->
+        <div class="t-design">
+            {% if pid %}
+            <img id="product_img" width="600" src="/static/loading.svg" data-src="{{ products.images.first.imgs.url }}" alt="">
+            <div class="design-container border-2 border-red-100">
+                <canvas width="300" height="430" id="custom_img"></canvas>
+            </div>
+            <div id="loader-container">
+                <div class="loader" id="loader"></div>
+            </div>
+            {% else %}
+            <img width="600" src="/static/goods/mr.png" alt="">
+            {% endif %}
+        </div>
+        <!--右边-->
+        <form id="form" method="post" class="w-72">
+            {% csrf_token %}
+            <input type="hidden" name="image_name" value="" id="image_name">
+            <input type="hidden" name="upload_name" value="" id="upload_name">
+            <input type="hidden" name="left_coordinate" value="" id="left_coordinate">
+            <input type="hidden" name="scaling" value="" id="scaling">
+            <input type="hidden" name="image_size" value="" id="image_size">
+            <input type="hidden" name="coordinate_of_image_center_point" value="" id="coicp">
+            <div class="flex flex-col gap-4 lg:gap-8 mt-8">
+                <div class="flex items-center justify-center gap-8 lg:justify-between">
+                    <span class="text-3xl">${{products.price}}</span>
+                    <input type="hidden" name="price" value="{{products.price}}" id="product_price">
+                    {% if pid %}
+                    <input type="submit" id="add_cart_btn" class="btn btn-outline" value="ADD TO CART">
+                    {% else %}
+                    <button disabled class="btn btn-outline">ADD TO CART</button>
+                    {% endif %}
+                </div>
+                <!--数量-->
+                <div class="flex items-center justify-center">
+                    <button type="button" class="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-l px-4 py-2" id="decrement-btn">-</button>
+                    <input type="number" name="num"
+                           class="w-12 bg-gray-100 text-center border-t border-b border-gray-200 focus:outline-none focus:border-blue-500"
+                           value="1" min="1" id="quantity-input">
+                    <button type="button" class="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-r px-4 py-2" id="increment-btn">+</button>
+                </div>
+                <!--风格-->
+                <div class="form-control lg:w-full max-w-xs">
+                    <label class="label">
+                        <span class="label-text">STYLE</span>
+                    </label>
+                    <select class="select select-bordered lg:w-72 w-full" name="style" id="style">
+                        {% for style in products.printdir_set.all %}
+                        <option value="{{ style.printdir_styleid.attribute_name }}-{{style.printdir_styleid.image.url}}">{{ style.printdir_styleid.attribute_value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!--尺寸-->
+                <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                        <span class="label-text">SIZE</span>
+                    </label>
+                    <select class="select select-bordered lg:w-72 w-full" name="size">
+                        {% for site in products.siteattribute_set.all %}
+                        <option value="{{ site.attribute_name }}">{{ site.attribute_value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!--颜色-->
+                <div class="form-control w-full max-w-xs">
+                    <label class="label">
+                        <span class="label-text">COLOR</span>
+                    </label>
+                    <select class="select select-bordered lg:w-72 w-full" name="color" id="color">
+                        {% for color in products.printdir_set.all %}
+                        <option value="{{ color.printdir_colorid.attribute_name }}-{{ color.printdir_colorid.image.url }}">{{ color.printdir_colorid.attribute_value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!--缩放-->
+                <input type="range" min="0" max="100" class="range range-xs" id="myRange" oninput="changePhotoSize()"/>
+                <div class="lg:w-72 w-full">
+                    <p class="font-bold">Ships Within</p>
+                    <p class="text-sm">7 business days</p>
+                </div>
+            </div>
+        </form>
+    </section>
+</main>
+{% else %}
+<p class="text-center">
+    Please log in and use!
+</p>
+{% endif %}
+<!--弹窗容器-->
+<div class="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 flex justify-center items-center" id="popup_preview" style="display: none">
+    <div class="bg-white rounded-lg shadow-lg p-6 popup_preview">
+        <div class="flex flex-col justify-center">
+            <h2 class="text-lg font-bold mb-4 text-center">Image Preview</h2>
+            <img src="" class="mb-4 btn btn-outline" alt="Image Preview" id="preview_img">
+        </div>
+        <div class="flex justify-center">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" id="preview_close">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 flex justify-center items-center" id="popup" style="display: none">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex flex-col justify-center">
+            <h2 class="text-lg font-bold mb-4">Product added to cart.</h2>
+            <a href="/cart/" class="mb-4 btn btn-outline">View Cart & Checkout</a>
+        </div>
+        <div class="flex justify-center">
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg" id="confirm-btn">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    let img = document.querySelector('#product_img');
+    let loader = document.querySelector('#loader');
+    // style切换图片
+    const style = document.querySelector('#style');
+    style.addEventListener('change', () => {
+        const value = style.value;
+        const parts = value.split('-');
+        const imgUrl = parts[1];
+        loader.style.display = 'block';
+        img.onload = function () {
+            loader.style.display = 'none';
+        }
+        img.src = `${imgUrl}`;
+    });
+
+    // 颜色切换图片
+    const color = document.querySelector('#color');
+    color.addEventListener('change', () => {
+        const value = color.value;
+        const parts = value.split('-');
+        const imgUrl = parts[1];
+        loader.style.display = 'block';
+        img.onload = function () {
+            loader.style.display = 'none';
+        }
+        img.src = `${imgUrl}`;
+    });
+</script>
+<script>
+    const addCartBtn = document.getElementById('add_cart_btn');
+    const popup = document.getElementById('popup');
+    const confirmBtn = document.getElementById('confirm-btn');
+
+    function updateCartCount() {
+        $.getJSON('/get_cart_count/', function (data) {
+            $('.cart_nums').text(data.count);
+        });
+    }
+
+    function submitForm() {
+        let pid = "{{ pid|escapejs }}"
+        // 导出图片并获取图片名
+        exportPhotoImage().then((imageName) => {
+            // 设置图片名到表单中
+            document.getElementById('image_name').value = imageName;
+
+            // 提交表单
+            let formData = new FormData(document.getElementById('form'));
+            fetch(`/production/${pid}/`, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    // 处理表单提交的响应
+                    // ...
+                });
+        });
+    }
+
+    addCartBtn.addEventListener('click', event => {
+        updateCartCount()
+        event.preventDefault(); // 阻止默认行为
+        submitForm();
+        getPhotoPosition()
+        // 显示弹窗
+        popup.style.display = 'flex';
+    });
+
+    // 关闭弹窗
+    function closePopup() {
+        popup.style.display = 'none';
+    }
+
+    confirmBtn.addEventListener('click', closePopup);
+
+    // 合并图预览
+    const preview = document.getElementById("preview");
+    const PreviewImg = document.getElementById('preview_img')
+    const popup_preview = document.getElementById('popup_preview')
+    const preview_close = document.getElementById('preview_close')
+    preview.addEventListener('click', async () => {
+        let node = document.querySelector('.t-design');
+        let dataUrl = await domtoimage.toPng(node, {quality: 1});
+        PreviewImg.src = dataUrl
+        // 显示弹窗
+        popup_preview.style.display = 'flex';
+    })
+    // 关闭弹窗
+    function ClosePreviewPopup() {
+        popup_preview.style.display = 'none';
+    }
+    preview_close.addEventListener('click', ClosePreviewPopup);
+
+    let canvas = null
+    let photoImage = null
+
+    function isPC() {
+        var userAgentInfo = navigator.userAgent;
+        var agents = ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"];
+        var isPC = true;
+
+        for (var i = 0; i < agents.length; i++) {
+            if (userAgentInfo.indexOf(agents[i]) > -1) {
+                isPC = false;
+                break;
+            }
+        }
+        return isPC;
+    }
+
+    function initCanvasImage() {
+        canvas = new fabric.Canvas('custom_img', {
+            backgroundColor: ""
+        })
+        setTimeout(() => {
+            addRect()
+        }, 100)
+    }
+
+    function addRect(imageUrl) {
+        // 第二张图片
+        fabric.Image.fromURL(imageUrl, (image) => {
+            image.set({
+                left: (canvas.width / 2), // 设置初始位置为画布中心
+                top: canvas.height / 2 - (isPC() ? 100 : 40),
+                originX: 'center', // 设置缩放基准点为中心
+                originY: 'center',
+                selectable: true,
+                hasControls: true,
+                hasBorders: true,
+                centeredScaling: true,
+            });
+
+            let inputElement = document.getElementById("myRange");
+            inputElement.value = isPC() ? 20 : 25
+
+            // 计算缩放比例
+            const maxWidth = canvas.width * ((inputElement.value / 20));
+            const maxHeight = canvas.height * ((inputElement.value / 20));
+            const widthScale = maxWidth / image.width;
+            const heightScale = maxHeight / image.height;
+            const scale = Math.min(widthScale, heightScale);
+
+            // 设置缩放比例
+            image.scale(scale);
+
+            let group1 = new fabric.Group([image], {left: 0, top: 100});
+            canvas.add(group1);
+            group1.clipTo = function (ctx) {
+                ctx.rect(0, 0, 300, 430);
+            };
+            canvas.add(new fabric.Rect({left: 0, top: 0, width: 300, height: 430, fill: '', selectable: false}))
+            canvas.moveTo(group1, 1);
+            photoImage = group1
+        }, {
+            crossOrigin: 'Anonymous'
+        });
+    }
+
+    function addPhoto2Canvas(imageUrl) {
+        // 第二张图片
+        fabric.Image.fromURL(imageUrl, (image) => {
+            image.set({
+                left: canvas.width / 2, // 设置初始位置为画布中心
+                top: canvas.height / 2 - (isPC() ? 100 : 40),
+                originX: 'center', // 设置缩放基准点为中心
+                originY: 'center',
+                selectable: true,
+                hasControls: true,
+                hasBorders: true,
+            });
+
+            let inputElement = document.getElementById("myRange");
+            inputElement.value = isPC() ? 20 : 25
+
+            // 计算缩放比例
+            const maxWidth = canvas.width * ((inputElement.value / 100) * 2); // 假设限制宽度为画布宽度的80%
+            const maxHeight = canvas.height * ((inputElement.value / 100) * 2); // 假设限制高度为画布高度的80%
+            const widthScale = maxWidth / image.width;
+            const heightScale = maxHeight / image.height;
+            const scale = Math.min(widthScale, heightScale);
+
+            // 设置缩放比例
+            image.scale(scale);
+
+            canvas.add(image);
+            photoImage = image
+            canvas.bringToFront(image); // 将第二张图片置于最上层
+            image.on('scaling', function () {
+                const scale = image.scaleX;
+                const maxWidth = 500;
+                const imageWidth = image.width * scale;
+                if (imageWidth > maxWidth) {
+                    const newScale = maxWidth / image.width;
+                    image.scaleToWidth(maxWidth);
+                    image.scaleToHeight(image.height * newScale);
+                }
+            });
+        }, {
+            crossOrigin: 'Anonymous'
+        });
+    }
+
+    function changePhotoSize(val) {
+        let inputElement = document.getElementById("myRange");
+        let value = parseInt(inputElement.value); // 将字符串值转换为数字类型
+        let scale = value / 18; // 根据输入值计算缩放比例
+        if (photoImage) {
+            photoImage.scaleToWidth(photoImage.width * scale);
+            photoImage.scaleToHeight(photoImage.height * scale);
+        }
+        canvas.renderAll();
+    }
+
+    // 获取坐标和缩放比
+    function getPhotoPosition() {
+        const left = photoImage.left;
+        const top = photoImage.top;
+        // 获取左上角坐标
+        document.getElementById('left_coordinate').value = `${Math.floor(left)} x ${Math.floor(top)}`
+
+        const scaleX = photoImage.scaleX;
+        const scaleY = photoImage.scaleY;
+        // 获取缩放比例
+        document.getElementById('scaling').value = `${Math.floor(scaleX)} x ${Math.floor(scaleY)}`
+
+        const width = photoImage.width * scaleX;
+        const height = photoImage.height * scaleY;
+        // 获取图片在画布中的实际尺寸
+        document.getElementById('image_size').value = `${Math.floor(width)} x ${Math.floor(height)}`
+
+        const cx = left + width / 2;
+        const cy = top + height / 2;
+        // 获取图片中心点坐标
+        document.getElementById('coicp').value = `${Math.floor(cx)} x ${Math.floor(cy)}`
+        canvas.renderAll()
+    }
+
+    function exportPhotoImage() {
+        return new Promise((resolve, reject) => {
+            let node = document.querySelector('.t-design');
+            domtoimage.toPng(node, {quality: 1})
+                .then(function (dataUrl) {
+                    let xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/export_image/');
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onload = function () {
+                        resolve(xhr.responseText);
+                    };
+                    xhr.send('image_data=' + encodeURIComponent(dataUrl.toString()));
+                })
+                .catch(reject);
+        });
+    }
+
+    window.onload = function () {
+        initCanvasImage()
+    }
+</script>
+<script>
+    // 获取按钮和输入框的引用
+    const decrementButton = document.getElementById("decrement-btn");
+    const incrementButton = document.getElementById("increment-btn");
+    const quantityInput = document.getElementById("quantity-input");
+
+    // 为减少按钮添加点击事件处理程序
+    decrementButton.addEventListener("click", function() {
+        const currentValue = parseInt(quantityInput.value);
+        if (currentValue > 1) {
+            quantityInput.value = currentValue - 1;
+        }
+    });
+
+    // 为增加按钮添加点击事件处理程序
+    incrementButton.addEventListener("click", function() {
+        const currentValue = parseInt(quantityInput.value);
+        quantityInput.value = currentValue + 1;
+    });
+
+    //上传文件
+    const fileInputs = document.getElementById("file");
+    const upload_file = document.getElementById("upload_file");
+    const loading = document.getElementById('loading');
+    const uploadImage = () => {
+        const file = fileInputs.files[0];
+        const fileSize = file.size;
+        if (fileSize > 2048 * 2048) {
+            alert('The image size exceeds the limit. Please select an image smaller than 2MB!');
+            return;
+        }
+        const fd = new FormData();
+        fd.append('image', file);
+        // 加载效果
+        loading.classList.remove('hidden');
+        fetch('/upload_image/', {
+            method: 'POST',
+            body: fd
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Response data:', data);
+                const imageUrl = data.image_url;
+                // 获取名称
+                const imageName = data.image_name;
+                // 赋值给input
+                document.getElementById('upload_name').value = imageName;
+                if (!imageUrl) {
+                    console.error('No image URL found in response data:', data);
+                    return;
+                }
+                addRect(imageUrl)
+                // 上传完成后隐藏loading
+                loading.classList.add('hidden');
+            }).catch(error => {
+                console.log('Error:', error)
+        })
+    }
+    upload_file.addEventListener('click', uploadImage)
+
+    // 切换位置模板
+    function showFront() {
+        let front_image = "{{ front_image.url|escapejs }}"
+        let img = document.getElementById('product_img')
+        let loader = document.querySelector('#loader');
+        loader.style.display = 'block';
+        img.onload = function () {
+            loader.style.display = 'none';
+        }
+        img.src = front_image;
+    }
+
+    function showBack() {
+        let back_image = "{{ back_image.url|escapejs }}"
+        let img = document.getElementById('product_img')
+        let loader = document.querySelector('#loader');
+        loader.style.display = 'block';
+        img.onload = function () {
+            loader.style.display = 'none';
+        }
+        img.src = back_image;
+    }
+</script>
+<style>
+    #popup_preview {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .popup_preview {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #preview_img {
+        margin-left: auto;
+        margin-right: auto;
+        width: 70%;
+        height: auto;
+        object-fit: contain;
+    }
+    #loader-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    #loader {
+        display: none;
+        border: 5px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 5px solid #3498db;
+        width: 100px;
+        height: 100px;
+        -webkit-animation: spin 2s linear infinite; /* Safari */
+        animation: spin 2s linear infinite;
+    }
+
+    /* Safari */
+    @-webkit-keyframes spin {
+        0% {
+            -webkit-transform: rotate(0deg);
+        }
+        100% {
+            -webkit-transform: rotate(360deg);
+        }
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}

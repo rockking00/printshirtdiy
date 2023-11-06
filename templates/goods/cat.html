@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Categories - UprintMate{% endblock %}
+{% block menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block moblie_menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<!--body-->
+<div class="text-sm breadcrumbs my-10 ml-10">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="{{ request.get_full_path }}">All Categories</a></li>
+    </ul>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 justify-center items-center gap-4 px-2 mt-14 mx-10 mb-24">
+    {% for category in categories %}
+    <div class="card card-compact w-96 bg-base-100 shadow-xl">
+        <figure class="h-44"><img src="{{ category.image.url }}" alt="{{ category.image.name }}"/></figure>
+        <div class="card-body">
+            <h2 class="card-title">{{ category.name }}</h2>
+            <p>{{ category.description|safe|truncatechars:120 }}...</p>
+            <div class="card-actions justify-end">
+                <a href="/categories/{{ category.name|lower }}/" class="whitespace-nowrap btn btn-primary">{{ category.name }}</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

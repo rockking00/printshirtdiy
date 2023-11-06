@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}{{cat_.name}}{% endblock %}
+{% block menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block moblie_menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<!--main-->
+<div class="text-sm breadcrumbs my-10 ml-24">
+    <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/categories/">All Categories</a></li>
+        <li><a href="{{ request.get_full_path }}">{{cat_.name}}</a></li>
+    </ul>
+</div>
+<div class="hero py-8 bg-base-200">
+    <div class="hero-content text-center">
+        <div class="max-w-5xl">
+            <h1 class="text-5xl font-bold">{{cat_.name}}</h1>
+            <p class="py-6">{{ cat_.description|safe }}</p>
+        </div>
+    </div>
+</div>
+<main class="max-w-6xl mx-auto m-16 px-8 lg:px-0">
+    <section class="flex flex-col gap-8 lg:grid lg:grid-cols-3 lg:gap-14">
+        {% for item in pages %}
+        <div class="card bg-base-100 shadow-xl border-2">
+            <figure>
+                <a href="/product/{{item.slug}}/" target="_blank">
+                    {% with item.images.first as first_image %}
+                    {% if first_image %}
+                    <img src="{{ first_image.imgs.url }}" alt="" class="cursor-pointer w-full"/>
+                    {% endif %}
+                    {% endwith %}
+                </a>
+            </figure>
+            <div class="card-body">
+                <h2 class="card-title">
+                    <a href="/product/{{item.slug}}/" target="_blank">{{ item.name }}</a>
+                </h2>
+                <p>${{ item.price }}</p>
+            </div>
+            <div class="flex justify-between py-4 px-3">
+                <div class="w-full flex justify-center">
+                    <a class="btn btn-info w-36 text-white hover:bg-blue-400" href="/product/{{item.slug}}/" target="_blank">
+                        <span>Customized</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-outline col-span-3" id="load_more">More</button>
+    </section>
+</main>
+{% endblock %}
+
+{% block script %}
+{% load static %}
+<script src="{% static 'goods/js/loadmore.js' %}"></script>
+{% endblock %}

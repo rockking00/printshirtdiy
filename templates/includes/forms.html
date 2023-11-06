@@ -1,0 +1,25 @@
+{% load widget_tweaks %}
+
+
+{% if form.errors %}
+  <div class="alert alert-danger py-4">
+    {% for field, errors in form.errors.items %}
+      {% for error in errors %}
+        {{ error }}
+      {% endfor %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+{% for field in form %}
+  <div class="form-group py-2">
+    {{ field.label_tag }}
+    {% render_field field class="form-control border-2 w-full rounded p-1 focus:outline-none shadow-md mb-2" %}
+
+    {% if field.help_text %}
+      <small class="form-text text-muted text-gray-500">
+        {{ field.help_text|safe }}
+      </small>
+    {% endif %}
+  </div>
+{% endfor %}

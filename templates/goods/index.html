@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Uprintmate,we can produce custom t-shirts, phone cases, beach towel,cooling sport towel ,buff and 800+ products with your designs printed on demand{% endblock %}
+{% block style %}
+<style>
+    .uplaod_img {
+        max-height: 400px;
+        height: auto;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+{% block menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block moblie_menu %}
+{% for item in categories %}
+<li><a href="/categories/{{ item.slug }}/">{{ item.name }}</a></li>
+{% endfor %}
+{% endblock %}
+
+{% block content %}
+<!--hero-->
+<section class="py-10 lg:py-24">
+    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div class="grid items-start grid-cols-1 gap-12 lg:grid-cols-2">
+            <div class="flex flex-col items-center justify-center">
+                <h1 class="mt-4 text-3xl font-bold text-black lg:mt-8 sm:text-5xl xl:text-7xl">Design Your Own
+                    Custom</h1>
+                <p class="mt-4 text-base text-black lg:mt-8 sm:text-xl">Allow anyone to turn their memories, dreams, and
+                    stories into beautiful high-quality printed wall art.</p>
+            </div>
+            <!--第二部分-->
+            <section class="flex flex-col space-y-4">
+                <div class="border-0 border-solid">
+                    <div class="slideshow-container">
+                        <div class="mySlides fadein-img flex justify-center">
+                            <img src="/static/goods/home.png" alt="home" class="uplaod_img rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+<!--body-->
+<main class="max-w-6xl mx-auto m-16 px-8 lg:px-0">
+    <section class="flex flex-col gap-8 lg:grid lg:grid-cols-3 lg:gap-14">
+        {% for item in products %}
+        <div class="card bg-base-100 shadow-xl border-2">
+            <figure>
+                <a href="/product/{{item.slug}}/" target="_blank">
+                    {% with item.images.first as first_image %}
+                    {% if first_image %}
+                    <img src="{{ first_image.imgs.url }}" alt="" class="cursor-pointer w-full"/>
+                    {% endif %}
+                    {% endwith %}
+                </a>
+            </figure>
+            <div class="card-body">
+                <h2 class="card-title">
+                    <a href="/product/{{item.slug}}/" target="_blank">{{ item.name }}</a>
+                </h2>
+                <p>${{ item.price }}</p>
+            </div>
+            <div class="flex justify-between py-4 px-3">
+                <div class="w-full flex justify-center">
+                    <a class="btn btn-info w-36 text-white hover:bg-blue-400" href="/product/{{item.slug}}/" target="_blank">
+                        <span>Customized</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-outline col-span-3" id="load_more">More</button>
+    </section>
+</main>
+{% endblock %}
+
+{% block script %}
+{% load static %}
+<script src="{% static 'goods/js/loadmore.js' %}"></script>
+{% endblock %}
